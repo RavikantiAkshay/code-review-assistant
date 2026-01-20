@@ -12,8 +12,10 @@ from groq import (
     InternalServerError,
 )
 
+from backend.rulesets.registry import RULESETS
+
 MAX_RETRIES = 3
-INITIAL_BACKOFF = 1.0  # seconds
+INITIAL_BACKOFF = 1.0
 MAX_FILE_BYTES = 50_000
 MAX_PROMPT_CHARS = 12_000
 
@@ -23,7 +25,6 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
-
 logger = logging.getLogger(__name__)
 
 
@@ -31,32 +32,60 @@ def review_file_with_llm(
     file_path: str,
     language: str,
     file_content: str,
+    ruleset: str | None = None,
 ) -> Dict:
+
+    if ruleset and ruleset not in RULESETS:
+        raise ValueError(f"Unknown ruleset: {ruleset}")
 
     if len(file_content.encode("utf-8")) > MAX_FILE_BYTES:
         raise ValueError("File too large for LLM review")
 
+    ruleset_block = ""
+
+    if ruleset:
+        rs = RULESETS[ruleset]
+        ruleset_block = (
+            "\nActive ruleset:\n"
+            f"Name: {rs['name']}\n"
+            f"Applicable categories: {', '.join(rs['categories'])}\n\n"
+            "Enforced rules:\n"
+            + "\n".join(
+                f"- [{r['id']}] {r['description']} "
+                f"(severity: {r['severity']}, reference: {r['link']})"
+                for r in rs["rules"]
+            )
+            + "\n"
+        )
+
     prompt = f"""
 You are a strict senior code reviewer.
 
-Review the following file and identify issues in these categories only:
+{ruleset_block}
+
+Review the following file and report issues in these categories ONLY:
 - correctness
 - security
 - complexity
 - readability
 - tests
 
-Rules:
-- Return ONLY valid JSON
-- No explanations, no markdown, no extra text
-- Follow the schema exactly
+ABSOLUTE RULES:
+- Return ONE JSON OBJECT (not an array)
+- Return ONLY valid JSON, no text outside it
+- Follow the schema EXACTLY
+- Do NOT add extra keys
+- Each issue object MUST contain ONLY:
+  - line (number)
+  - severity ("low" | "medium" | "high")
+  - message (non-empty string)
 - If a category has no issues, return an empty array
-- Severity must be one of: low, medium, high
-- Use line numbers from the file when possible
+- When an issue matches an enforced rule, include the rule ID in the message
+  Example: "[RH-01] Hooks must be called at the top level"
 
 JSON schema:
 {{
-  "file": "<string>",
+  "file": "{file_path}",
   "reviews": {{
     "correctness": [],
     "security": [],
@@ -66,15 +95,12 @@ JSON schema:
   }}
 }}
 
-File path: {file_path}
-Language: {language}
-
 File content:
 {file_content}
 """.strip()
 
     if len(prompt) > MAX_PROMPT_CHARS:
-        raise ValueError("Prompt too large for LLM")
+        raise ValueError("Prompt too large")
 
     messages = [
         {"role": "system", "content": "You are a strict senior code reviewer."},
@@ -103,17 +129,35 @@ File content:
             attempt += 1
             logger.error("LLM backend error: %s", e)
 
-        if attempt > MAX_RETRIES:
-            logger.critical("LLM failed after %d retries", MAX_RETRIES)
+        if attempt >= MAX_RETRIES:
             raise RuntimeError("LLM request failed after retries")
 
         time.sleep(backoff)
         backoff *= 2
 
+    import re
+
     raw_output = response.choices[0].message.content.strip()
 
-    try:
-        return json.loads(raw_output)
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON returned by LLM:\n%s", raw_output)
+    # Attempt to extract JSON object from any extra text
+    match = re.search(r"\{.*\}", raw_output, re.DOTALL)
+    if not match:
+        logger.error("No JSON object found in LLM output:\n%s", raw_output)
         raise ValueError("LLM returned invalid JSON")
+
+    json_text = match.group(0)
+
+    try:
+        parsed = json.loads(json_text)
+    except json.JSONDecodeError:
+        logger.error("Extracted JSON is invalid:\n%s", json_text)
+        raise ValueError("LLM returned invalid JSON")
+
+
+    if not isinstance(parsed, dict):
+        raise ValueError("LLM response must be a JSON object")
+
+    if "file" not in parsed or "reviews" not in parsed:
+        raise ValueError("Invalid schema returned by LLM")
+
+    return parsed
