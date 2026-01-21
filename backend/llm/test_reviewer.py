@@ -5,10 +5,11 @@ if __name__ == "__main__":
         content = f.read()
 
     result = review_file_with_llm(
-        file_path="test.js",
-        language="javascript",
-        file_content=content,
-        ruleset="react-hooks"
+    file_path="test.js",
+    language="javascript",
+    file_content=content,
+    ruleset="react-hooks"
     )
+
 
     print(result)

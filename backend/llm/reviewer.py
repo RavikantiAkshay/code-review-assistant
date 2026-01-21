@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+import re
 from typing import Dict
 
 from groq import Groq
@@ -28,6 +29,30 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+JSON_SCHEMA = """
+{
+  "file": "<string>",
+  "reviews": {
+    "correctness": [
+      {
+        "line": <number>,
+        "severity": "<low|medium|high>",
+        "message": "<string>",
+        "rule": {
+          "id": "<string>",
+          "link": "<string>"
+        } | null
+      }
+    ],
+    "security": [],
+    "complexity": [],
+    "readability": [],
+    "tests": []
+  }
+}
+""".strip()
+
+
 def review_file_with_llm(
     file_path: str,
     language: str,
@@ -45,17 +70,24 @@ def review_file_with_llm(
 
     if ruleset:
         rs = RULESETS[ruleset]
+
+        rules_lines = []
+        for r in rs["rules"]:
+            rules_lines.append(
+                f"- ID: {r['id']}\n"
+                f"  Description: {r['description']}\n"
+                f"  Severity: {r['severity']}\n"
+                f"  Reference: {r['link']}"
+            )
+
+        rules_text = "\n".join(rules_lines)
+
         ruleset_block = (
-            "\nActive ruleset:\n"
+            "Active ruleset:\n"
             f"Name: {rs['name']}\n"
             f"Applicable categories: {', '.join(rs['categories'])}\n\n"
-            "Enforced rules:\n"
-            + "\n".join(
-                f"- [{r['id']}] {r['description']} "
-                f"(severity: {r['severity']}, reference: {r['link']})"
-                for r in rs["rules"]
-            )
-            + "\n"
+            "Enforced rules (use ONLY these):\n"
+            f"{rules_text}"
         )
 
     prompt = f"""
@@ -80,20 +112,15 @@ ABSOLUTE RULES:
   - severity ("low" | "medium" | "high")
   - message (non-empty string)
 - If a category has no issues, return an empty array
-- When an issue matches an enforced rule, include the rule ID in the message
-  Example: "[RH-01] Hooks must be called at the top level"
+- If an issue matches an enforced rule, you MUST:
+  - include the rule ID and link inside the "rule" object
+- If no rule applies, set "rule" to null
+- NEVER mention rule IDs or links inside "message"
 
 JSON schema:
-{{
-  "file": "{file_path}",
-  "reviews": {{
-    "correctness": [],
-    "security": [],
-    "complexity": [],
-    "readability": [],
-    "tests": []
-  }}
-}}
+{JSON_SCHEMA}
+
+File path: {file_path}
 
 File content:
 {file_content}
@@ -135,11 +162,8 @@ File content:
         time.sleep(backoff)
         backoff *= 2
 
-    import re
-
     raw_output = response.choices[0].message.content.strip()
 
-    # Attempt to extract JSON object from any extra text
     match = re.search(r"\{.*\}", raw_output, re.DOTALL)
     if not match:
         logger.error("No JSON object found in LLM output:\n%s", raw_output)
@@ -152,7 +176,6 @@ File content:
     except json.JSONDecodeError:
         logger.error("Extracted JSON is invalid:\n%s", json_text)
         raise ValueError("LLM returned invalid JSON")
-
 
     if not isinstance(parsed, dict):
         raise ValueError("LLM response must be a JSON object")
