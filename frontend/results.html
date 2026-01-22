@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Code Review Results</title>
+</head>
+<body>
+
+  <h1>Code Review Results</h1>
+
+  <div id="filters">
+    <select id="severityFilter">
+      <option value="">All Severities</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+
+    <select id="fileFilter">
+      <option value="">All Files</option>
+    </select>
+
+    <select id="categoryFilter">
+      <option value="">All Categories</option>
+      <option value="correctness">Correctness</option>
+      <option value="security">Security</option>
+      <option value="complexity">Complexity</option>
+      <option value="readability">Readability</option>
+      <option value="tests">Tests</option>
+    </select>
+  </div>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Impact</th>
+        <th>Severity</th>
+        <th>File</th>
+        <th>Line</th>
+        <th>Category</th>
+        <th>Summary</th>
+      </tr>
+    </thead>
+    <tbody id="resultsTable"></tbody>
+  </table>
+
+  <script src="results.js"></script>
+</body>
+</html>
