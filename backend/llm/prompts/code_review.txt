@@ -14,6 +14,8 @@ Rules:
 - If a category has no issues, return an empty array
 - Severity must be one of: low, medium, high
 - Use line numbers from the file when possible
+- For each issue, include the problematic code snippet
+- For each issue, provide a suggested fix or corrected code
 
 JSON schema:
 {
@@ -22,10 +24,10 @@ JSON schema:
     "correctness": [
       {
         "line": <number or null>,
-        "issue": "<string>",
         "severity": "<low|medium|high>",
-        "snippet": "<string>",
-        "fix": "<string>"
+        "message": "<string>",
+        "snippet": "<string: the exact problematic code>",
+        "fix": "<string: suggested fix or corrected code>"
       }
     ],
     "security": [],

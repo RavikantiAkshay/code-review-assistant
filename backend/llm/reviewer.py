@@ -51,6 +51,8 @@ JSON_SCHEMA = """
         "line": <number>,
         "severity": "<low|medium|high>",
         "message": "<string>",
+        "snippet": "<string: the problematic code snippet>",
+        "fix": "<string: suggested fix or corrected code>",
         "rule": {
           "id": "<string>",
           "link": "<string>"
@@ -120,10 +122,13 @@ ABSOLUTE RULES:
 - Return ONLY valid JSON, no text outside it
 - Follow the schema EXACTLY
 - Do NOT add extra keys
-- Each issue object MUST contain ONLY:
-  - line (number)
+- Each issue object MUST contain:
+  - line (number: the line where the issue occurs)
   - severity ("low" | "medium" | "high")
-  - message (non-empty string)
+  - message (non-empty string: description of the issue)
+  - snippet (string: the exact problematic code from the file)
+  - fix (string: the corrected code or suggested fix)
+  - rule (object with id and link, or null if no rule applies)
 - If a category has no issues, return an empty array
 - If an issue matches an enforced rule, you MUST:
   - include the rule ID and link inside the "rule" object
