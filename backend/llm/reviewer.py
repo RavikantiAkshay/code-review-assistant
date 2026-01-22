@@ -20,7 +20,20 @@ INITIAL_BACKOFF = 1.0
 MAX_FILE_BYTES = 50_000
 MAX_PROMPT_CHARS = 12_000
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+# Lazy-loaded client
+_client = None
+
+
+def get_groq_client():
+    """Get or create Groq client (lazy initialization)."""
+    global _client
+    if _client is None:
+        api_key = os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            raise RuntimeError("GROQ_API_KEY environment variable is not set")
+        _client = Groq(api_key=api_key)
+    return _client
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -141,7 +154,7 @@ File content:
         try:
             logger.info("LLM request attempt %d for %s", attempt + 1, file_path)
 
-            response = client.chat.completions.create(
+            response = get_groq_client().chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=messages,
                 timeout=30,
