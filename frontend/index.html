@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered code review assistant with static analysis and LLM insights" />
+  <title>Code Review Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/>
+        </svg>
+        <h1>Code Review Assistant</h1>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-link active">Review</a>
+        <a href="#" class="nav-link" id="docs-link">API Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Upload Section -->
+    <section class="upload-section">
+      <div class="section-header">
+        <h2>Upload Code for Review</h2>
+        <p class="section-subtitle">Upload a ZIP file or provide a Git repository URL</p>
+      </div>
+
+      <div class="upload-options">
+        <!-- Tab Buttons -->
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="zip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            </svg>
+            Upload ZIP
+          </button>
+          <button class="tab-btn" data-tab="git">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94"/>
+            </svg>
+            Git URL
+          </button>
+        </div>
+
+        <!-- ZIP Upload Tab -->
+        <div class="tab-content active" id="zip-tab">
+          <div class="upload-dropzone" id="dropzone">
+            <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <p class="dropzone-text">Drag & drop your ZIP file here</p>
+            <p class="dropzone-subtext">or click to browse</p>
+            <input type="file" id="zip-input" accept=".zip" hidden />
+          </div>
+          <div class="file-info hidden" id="file-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/>
+            </svg>
+            <span id="file-name"></span>
+            <button class="remove-file" id="remove-file">&times;</button>
+          </div>
+        </div>
+
+        <!-- Git URL Tab -->
+        <div class="tab-content" id="git-tab">
+          <div class="input-group">
+            <label for="git-url">Repository URL</label>
+            <input type="url" id="git-url" placeholder="https://github.com/user/repo" />
+          </div>
+          <div class="input-group">
+            <label for="git-branch">Branch (optional)</label>
+            <input type="text" id="git-branch" placeholder="main" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Ruleset Selection -->
+      <div class="ruleset-section">
+        <label for="ruleset-select">Select Ruleset</label>
+        <select id="ruleset-select">
+          <option value="">Auto-detect (Recommended)</option>
+        </select>
+        <p class="ruleset-hint">Rulesets provide specific guidelines for code review</p>
+      </div>
+
+      <!-- Submit Button -->
+      <button class="submit-btn" id="submit-btn" disabled>
+        <span class="btn-text">Start Review</span>
+        <span class="btn-loader hidden">
+          <svg class="spinner" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 60"/>
+          </svg>
+          Analyzing...
+        </span>
+      </button>
+    </section>
+
+    <!-- Results Section (Initially Hidden) -->
+    <section class="results-section hidden" id="results-section">
+      <div class="results-header">
+        <h2>Review Results</h2>
+        <div class="results-summary" id="results-summary">
+          <!-- Filled by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <label for="severity-filter">Severity</label>
+          <select id="severity-filter">
+            <option value="">All Severities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="file-filter">File</label>
+          <select id="file-filter">
+            <option value="">All Files</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="category-filter">Category</label>
+          <select id="category-filter">
+            <option value="">All Categories</option>
+            <option value="correctness">Correctness</option>
+            <option value="security">Security</option>
+            <option value="complexity">Complexity</option>
+            <option value="readability">Readability</option>
+            <option value="tests">Tests</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Issues List -->
+      <div class="issues-list" id="issues-list">
+        <!-- Filled by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <div class="loading-overlay hidden" id="loading-overlay">
+      <div class="loading-content">
+        <svg class="loading-spinner" viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="80 40"/>
+        </svg>
+        <p class="loading-text">Analyzing your code...</p>
+        <p class="loading-subtext" id="loading-status">Uploading files</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 Code Review Assistant. Built with FastAPI + Groq LLM.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

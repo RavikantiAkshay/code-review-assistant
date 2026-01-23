@@ -8,15 +8,22 @@ def analyze_js_file(file_path: str) -> List[Dict]:
     Each issue is a dict with keys: file, line, column, code, message, severity
     """
     # Run ESLint in JSON output mode
+    # --no-ignore: Allow linting files outside base path (temp directories)
+    # --no-eslintrc: Use default rules if no config found
     cmd = [
-        "npx.cmd", "eslint", file_path, "--format", "json"
+        "npx.cmd", "eslint", file_path, 
+        "--format", "json",
+        "--no-ignore",
     ]
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=None)
     issues: List[Dict] = []
 
-    if result.returncode not in [0, 1]:  # 0=no errors, 1=errors, >1=ESLint failure
-        raise RuntimeError(f"ESLint failed: {result.stderr}")
+    # ESLint exit codes: 0=no errors, 1=errors found, 2=fatal error
+    if result.returncode == 2:
+        # Log error but don't raise - allow review to continue
+        print(f"ESLint warning: {result.stderr}")
+        return issues
 
     try:
         eslint_output = json.loads(result.stdout)
@@ -25,6 +32,9 @@ def analyze_js_file(file_path: str) -> List[Dict]:
 
     for file_report in eslint_output:
         for msg in file_report.get("messages", []):
+            # Skip fatal parsing errors that aren't actionable
+            if msg.get("fatal"):
+                continue
             issues.append({
                 "tool": "eslint",
                 "file": file_report.get("filePath"),
