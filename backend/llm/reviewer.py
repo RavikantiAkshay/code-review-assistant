@@ -162,6 +162,7 @@ File content:
             response = get_groq_client().chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=messages,
+                temperature=0,  # Deterministic output
                 timeout=30,
             )
             break

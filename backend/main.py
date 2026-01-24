@@ -6,6 +6,10 @@ import zipfile
 import os
 import tempfile
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from backend.ingestion.git_ingestion import (
     clone_repository,
