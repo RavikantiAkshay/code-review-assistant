@@ -1,0 +1,414 @@
+{
+    "version": "1.0",
+    "description": "Ground truth for Code Review Assistant evaluation",
+    "total_issues": 39,
+    "files": {
+        "src/auth.py": {
+            "language": "python",
+            "issue_count": 8,
+            "issues": [
+                {
+                    "id": "auth-1",
+                    "line": 8,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "hardcoded_credentials",
+                    "message": "Hardcoded database password",
+                    "code_snippet": "DATABASE_PASSWORD = \"admin123\""
+                },
+                {
+                    "id": "auth-2",
+                    "line": 9,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "hardcoded_credentials",
+                    "message": "Hardcoded API secret key",
+                    "code_snippet": "API_SECRET_KEY = \"sk_live_abcd1234567890\""
+                },
+                {
+                    "id": "auth-3",
+                    "line": 13,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "weak_hashing",
+                    "message": "MD5 is cryptographically weak for password hashing",
+                    "code_snippet": "return hashlib.md5(password.encode()).hexdigest()"
+                },
+                {
+                    "id": "auth-4",
+                    "line": 18,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "sql_injection",
+                    "message": "SQL injection vulnerability via string formatting",
+                    "code_snippet": "query = f\"SELECT * FROM users WHERE username='{username}' AND password='{password}'\""
+                },
+                {
+                    "id": "auth-5",
+                    "line": 23,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "code_injection",
+                    "message": "Dangerous use of eval() with user input",
+                    "code_snippet": "result = eval(code_string)"
+                },
+                {
+                    "id": "auth-6",
+                    "line": 26,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "unused_import",
+                    "message": "Unused import 'sys'",
+                    "code_snippet": "import sys"
+                },
+                {
+                    "id": "auth-7",
+                    "line": 29,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "missing_docstring",
+                    "message": "Function missing docstring",
+                    "code_snippet": "def validate_token(token):"
+                },
+                {
+                    "id": "auth-8",
+                    "line": 40,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "bare_except",
+                    "message": "Too broad exception clause",
+                    "code_snippet": "except:"
+                },
+                {
+                    "id": "auth-9",
+                    "line": 45,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "mutable_default",
+                    "message": "Mutable default argument",
+                    "code_snippet": "def add_user(users_list=[]):"
+                }
+            ]
+        },
+        "src/database.py": {
+            "language": "python",
+            "issue_count": 7,
+            "issues": [
+                {
+                    "id": "db-1",
+                    "line": 10,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "sql_injection",
+                    "message": "SQL injection via string concatenation",
+                    "code_snippet": "query = \"SELECT * FROM users WHERE id = \" + str(user_id)"
+                },
+                {
+                    "id": "db-2",
+                    "line": 18,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "sql_injection",
+                    "message": "SQL injection via f-string",
+                    "code_snippet": "cursor.execute(f\"SELECT * FROM users WHERE name LIKE '%{search_term}%'\")"
+                },
+                {
+                    "id": "db-3",
+                    "line": 22,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "resource_leak",
+                    "message": "Database connection not closed",
+                    "code_snippet": "# Connection never closed!"
+                },
+                {
+                    "id": "db-4",
+                    "line": 28,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "missing_error_handling",
+                    "message": "No error handling for database operations",
+                    "code_snippet": "def delete_user(user_id):"
+                },
+                {
+                    "id": "db-5",
+                    "line": 35,
+                    "severity": "medium",
+                    "category": "complexity",
+                    "type": "high_cyclomatic_complexity",
+                    "message": "Deeply nested conditionals (cyclomatic complexity > 10)",
+                    "code_snippet": "def process_user_data(user):"
+                },
+                {
+                    "id": "db-6",
+                    "line": 57,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "magic_numbers",
+                    "message": "Magic numbers without explanation",
+                    "code_snippet": "return posts * 10 + comments * 5 + likes * 2"
+                },
+                {
+                    "id": "db-7",
+                    "line": 61,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "poor_naming",
+                    "message": "Single letter variable names",
+                    "code_snippet": "def update_stats(u, p, c):"
+                }
+            ]
+        },
+        "src/utils.py": {
+            "language": "python",
+            "issue_count": 8,
+            "issues": [
+                {
+                    "id": "utils-1",
+                    "line": 8,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "unused_variable",
+                    "message": "Unused constant",
+                    "code_snippet": "UNUSED_CONSTANT = \"this is never used\""
+                },
+                {
+                    "id": "utils-2",
+                    "line": 11,
+                    "severity": "medium",
+                    "category": "complexity",
+                    "type": "function_too_long",
+                    "message": "Function too long with repetitive code",
+                    "code_snippet": "def process_data(data):"
+                },
+                {
+                    "id": "utils-3",
+                    "line": 40,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "comparison_to_none",
+                    "message": "Use 'is None' instead of '== None'",
+                    "code_snippet": "if val == None:"
+                },
+                {
+                    "id": "utils-4",
+                    "line": 46,
+                    "severity": "low",
+                    "category": "correctness",
+                    "type": "type_comparison",
+                    "message": "Use isinstance() instead of type() comparison",
+                    "code_snippet": "if type(value) == str:"
+                },
+                {
+                    "id": "utils-5",
+                    "line": 53,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "bare_except",
+                    "message": "Bare except clause catches all exceptions",
+                    "code_snippet": "except:"
+                },
+                {
+                    "id": "utils-6",
+                    "line": 57,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "missing_type_hints",
+                    "message": "Missing return type hint",
+                    "code_snippet": "def format_name(first, last):"
+                },
+                {
+                    "id": "utils-7",
+                    "line": 62,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "global_variable",
+                    "message": "Modifying global variable",
+                    "code_snippet": "global counter"
+                },
+                {
+                    "id": "utils-8",
+                    "line": 68,
+                    "severity": "low",
+                    "category": "complexity",
+                    "type": "inefficient_string_concat",
+                    "message": "Inefficient string concatenation in loop",
+                    "code_snippet": "report = report + str(item) + \"\\n\""
+                }
+            ]
+        },
+        "src/api.js": {
+            "language": "javascript",
+            "issue_count": 9,
+            "issues": [
+                {
+                    "id": "api-1",
+                    "line": 5,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "var_usage",
+                    "message": "Use const or let instead of var",
+                    "code_snippet": "var apiUrl = \"https://api.example.com\";"
+                },
+                {
+                    "id": "api-2",
+                    "line": 9,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "eval_usage",
+                    "message": "Dangerous use of eval()",
+                    "code_snippet": "return eval(codeString);"
+                },
+                {
+                    "id": "api-3",
+                    "line": 14,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "xss_vulnerability",
+                    "message": "innerHTML can lead to XSS vulnerabilities",
+                    "code_snippet": "document.getElementById(elementId).innerHTML = htmlContent;"
+                },
+                {
+                    "id": "api-4",
+                    "line": 18,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "missing_semicolon",
+                    "message": "Missing semicolons",
+                    "code_snippet": "const data = fetch(apiUrl)"
+                },
+                {
+                    "id": "api-5",
+                    "line": 24,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "loose_equality",
+                    "message": "Use === instead of ==",
+                    "code_snippet": "if (val == null)"
+                },
+                {
+                    "id": "api-6",
+                    "line": 35,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "unused_variable",
+                    "message": "Unused variable",
+                    "code_snippet": "const unusedVar = \"this is never used\";"
+                },
+                {
+                    "id": "api-7",
+                    "line": 43,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "missing_error_handling",
+                    "message": "No error handling in async function",
+                    "code_snippet": "async function fetchUser(userId)"
+                },
+                {
+                    "id": "api-8",
+                    "line": 50,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "console_log",
+                    "message": "console.log left in production code",
+                    "code_snippet": "console.log(\"Debug value:\", value);"
+                },
+                {
+                    "id": "api-9",
+                    "line": 55,
+                    "severity": "medium",
+                    "category": "complexity",
+                    "type": "callback_hell",
+                    "message": "Nested callbacks (callback hell)",
+                    "code_snippet": "getData(function(data) {"
+                }
+            ]
+        },
+        "src/components.jsx": {
+            "language": "javascript",
+            "issue_count": 7,
+            "issues": [
+                {
+                    "id": "react-1",
+                    "line": 13,
+                    "severity": "high",
+                    "category": "correctness",
+                    "type": "missing_dependency",
+                    "message": "Missing dependency in useEffect",
+                    "code_snippet": "}, []); // Missing props.userId in dependency array!"
+                },
+                {
+                    "id": "react-2",
+                    "line": 22,
+                    "severity": "high",
+                    "category": "correctness",
+                    "type": "conditional_hook",
+                    "message": "Hook called conditionally",
+                    "code_snippet": "const [temp, setTemp] = useState(0);"
+                },
+                {
+                    "id": "react-3",
+                    "line": 28,
+                    "severity": "high",
+                    "category": "security",
+                    "type": "dangerous_innerhtml",
+                    "message": "dangerouslySetInnerHTML can lead to XSS",
+                    "code_snippet": "return <div dangerouslySetInnerHTML={{ __html: user.bio }} />;"
+                },
+                {
+                    "id": "react-4",
+                    "line": 36,
+                    "severity": "low",
+                    "category": "complexity",
+                    "type": "inline_function",
+                    "message": "Inline function in render creates new function each render",
+                    "code_snippet": "<button onClick={() => console.log(user)}>"
+                },
+                {
+                    "id": "react-5",
+                    "line": 41,
+                    "severity": "medium",
+                    "category": "correctness",
+                    "type": "missing_key",
+                    "message": "Missing key prop in list",
+                    "code_snippet": "<li>{post.title}</li>"
+                },
+                {
+                    "id": "react-6",
+                    "line": 36,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "console_log",
+                    "message": "console.log in event handler",
+                    "code_snippet": "console.log(user)"
+                },
+                {
+                    "id": "react-7",
+                    "line": 7,
+                    "severity": "low",
+                    "category": "readability",
+                    "type": "missing_prop_types",
+                    "message": "Missing prop validation",
+                    "code_snippet": "function UserProfile(props)"
+                }
+            ]
+        }
+    },
+    "summary": {
+        "by_severity": {
+            "high": 12,
+            "medium": 14,
+            "low": 13
+        },
+        "by_category": {
+            "security": 11,
+            "correctness": 13,
+            "complexity": 5,
+            "readability": 10
+        },
+        "by_language": {
+            "python": 23,
+            "javascript": 16
+        }
+    }
+}
