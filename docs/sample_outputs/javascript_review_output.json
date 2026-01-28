@@ -1,0 +1,120 @@
+{
+    "description": "Sample output from /review endpoint for a JavaScript React file",
+    "request": {
+        "temp_dir": "/tmp/upload_xyz789",
+        "files": [
+            "src/components/UserProfile.jsx"
+        ],
+        "ruleset": "react_hooks"
+    },
+    "response": {
+        "ranked_issues": [
+            {
+                "line": 13,
+                "severity": "high",
+                "message": "Missing dependency 'props.userId' in useEffect dependency array",
+                "category": "correctness",
+                "impact": 8.5,
+                "source": "llm",
+                "file": "src/components/UserProfile.jsx",
+                "snippet": "useEffect(() => {\n    fetchUser(props.userId)\n}, [])",
+                "fix": "useEffect(() => {\n    fetchUser(props.userId)\n}, [props.userId])",
+                "rule": {
+                    "id": "REACT001",
+                    "link": "https://react.dev/reference/react/useEffect#specifying-reactive-dependencies"
+                }
+            },
+            {
+                "line": 22,
+                "severity": "high",
+                "message": "Hook called conditionally - violates Rules of Hooks",
+                "category": "correctness",
+                "impact": 8.2,
+                "source": "llm",
+                "file": "src/components/UserProfile.jsx",
+                "snippet": "if (loading) {\n    const [temp, setTemp] = useState(0);\n    return <Loading />;\n}",
+                "fix": "// Move hook before any conditional returns\nconst [temp, setTemp] = useState(0);\n\nif (loading) {\n    return <Loading />;\n}",
+                "rule": {
+                    "id": "REACT002",
+                    "link": "https://react.dev/warnings/invalid-hook-call-warning"
+                }
+            },
+            {
+                "line": 28,
+                "severity": "high",
+                "message": "dangerouslySetInnerHTML can lead to XSS vulnerabilities",
+                "category": "security",
+                "impact": 7.8,
+                "source": "llm",
+                "file": "src/components/UserProfile.jsx",
+                "snippet": "<div dangerouslySetInnerHTML={{ __html: user.bio }} />",
+                "fix": "import DOMPurify from 'dompurify';\n<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(user.bio) }} />",
+                "rule": {
+                    "id": "SEC005",
+                    "link": "https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html"
+                }
+            },
+            {
+                "line": 41,
+                "severity": "medium",
+                "message": "Missing 'key' prop in list rendering",
+                "category": "correctness",
+                "impact": 5.5,
+                "source": "static",
+                "file": "src/components/UserProfile.jsx",
+                "snippet": "{user.posts.map((post) => (\n    <li>{post.title}</li>\n))}",
+                "fix": "{user.posts.map((post) => (\n    <li key={post.id}>{post.title}</li>\n))}",
+                "rule": {
+                    "id": "REACT003",
+                    "link": "https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key"
+                }
+            },
+            {
+                "line": 36,
+                "severity": "low",
+                "message": "Inline arrow function in onClick creates new function on each render",
+                "category": "complexity",
+                "impact": 2.5,
+                "source": "llm",
+                "file": "src/components/UserProfile.jsx",
+                "snippet": "<button onClick={() => console.log(user)}>",
+                "fix": "const handleClick = useCallback(() => {\n    console.log(user);\n}, [user]);\n\n<button onClick={handleClick}>",
+                "rule": null
+            },
+            {
+                "line": 36,
+                "severity": "low",
+                "message": "Unexpected console statement",
+                "category": "readability",
+                "impact": 1.5,
+                "source": "static",
+                "file": "src/components/UserProfile.jsx",
+                "code": "no-console",
+                "snippet": "console.log(user)",
+                "fix": "// Remove console.log or use a proper logger"
+            }
+        ],
+        "file_results": [
+            {
+                "file": "src/components/UserProfile.jsx",
+                "issues": [
+                    {
+                        "source": "static",
+                        "count": 2
+                    },
+                    {
+                        "source": "llm",
+                        "count": 4
+                    }
+                ],
+                "error": null
+            }
+        ],
+        "summary": {
+            "total_issues": 6,
+            "high_severity": 3,
+            "medium_severity": 1,
+            "low_severity": 2
+        }
+    }
+}

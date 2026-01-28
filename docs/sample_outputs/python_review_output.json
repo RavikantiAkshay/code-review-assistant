@@ -1,0 +1,120 @@
+{
+    "description": "Sample output from /review endpoint for a Python file with security issues",
+    "request": {
+        "temp_dir": "/tmp/upload_abc123",
+        "files": [
+            "src/auth.py"
+        ],
+        "ruleset": null
+    },
+    "response": {
+        "ranked_issues": [
+            {
+                "line": 8,
+                "severity": "high",
+                "message": "Hardcoded database password exposes credentials in source code",
+                "category": "security",
+                "impact": 9.5,
+                "source": "llm",
+                "file": "src/auth.py",
+                "snippet": "DATABASE_PASSWORD = \"admin123\"",
+                "fix": "DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD')",
+                "rule": {
+                    "id": "SEC001",
+                    "link": "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/"
+                }
+            },
+            {
+                "line": 13,
+                "severity": "high",
+                "message": "MD5 is cryptographically weak for password hashing. Use bcrypt or argon2.",
+                "category": "security",
+                "impact": 9.2,
+                "source": "llm",
+                "file": "src/auth.py",
+                "snippet": "return hashlib.md5(password.encode()).hexdigest()",
+                "fix": "import bcrypt\nreturn bcrypt.hashpw(password.encode(), bcrypt.gensalt())",
+                "rule": {
+                    "id": "SEC002",
+                    "link": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html"
+                }
+            },
+            {
+                "line": 18,
+                "severity": "high",
+                "message": "SQL injection vulnerability via string formatting",
+                "category": "security",
+                "impact": 9.0,
+                "source": "llm",
+                "file": "src/auth.py",
+                "snippet": "query = f\"SELECT * FROM users WHERE username='{username}'\"",
+                "fix": "query = \"SELECT * FROM users WHERE username = ?\"\ncursor.execute(query, (username,))",
+                "rule": {
+                    "id": "SEC003",
+                    "link": "https://owasp.org/Top10/A03_2021-Injection/"
+                }
+            },
+            {
+                "line": 23,
+                "severity": "high",
+                "message": "Dangerous use of eval() with potentially untrusted input",
+                "category": "security",
+                "impact": 8.8,
+                "source": "llm",
+                "file": "src/auth.py",
+                "snippet": "result = eval(code_string)",
+                "fix": "import ast\nresult = ast.literal_eval(code_string)  # Only for literals\n# Or use a safe expression parser",
+                "rule": {
+                    "id": "SEC004",
+                    "link": "https://bandit.readthedocs.io/en/latest/plugins/b307_eval.html"
+                }
+            },
+            {
+                "line": 26,
+                "severity": "low",
+                "message": "'sys' imported but unused",
+                "category": "readability",
+                "impact": 2.0,
+                "source": "static",
+                "file": "src/auth.py",
+                "code": "F401",
+                "snippet": "import sys",
+                "fix": "# Remove unused import"
+            },
+            {
+                "line": 40,
+                "severity": "medium",
+                "message": "Bare except clause catches all exceptions including KeyboardInterrupt",
+                "category": "correctness",
+                "impact": 5.5,
+                "source": "llm",
+                "file": "src/auth.py",
+                "snippet": "except:",
+                "fix": "except Exception as e:\n    logger.error(f\"Error: {e}\")\n    return None",
+                "rule": null
+            }
+        ],
+        "file_results": [
+            {
+                "file": "src/auth.py",
+                "issues": [
+                    {
+                        "source": "static",
+                        "count": 2
+                    },
+                    {
+                        "source": "llm",
+                        "count": 5
+                    }
+                ],
+                "error": null
+            }
+        ],
+        "summary": {
+            "total_issues": 6,
+            "high_severity": 4,
+            "medium_severity": 1,
+            "low_severity": 1
+        }
+    }
+}
