@@ -3,8 +3,8 @@
  * Handles UI interactions and API communication
  */
 
-// API Base URL (update for production)
-const API_BASE = 'http://localhost:8000';
+// API Base URL - Deployed on Render
+const API_BASE = 'https://code-review-assistant-jquc.onrender.com';
 
 // State
 let currentTab = 'zip';
