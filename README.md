@@ -6,6 +6,13 @@ An AI-powered code review tool that combines static analysis with LLM-based insi
 ![Python](https://img.shields.io/badge/python-3.10+-green.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-blue.svg)
 
+## 🚀 Live Demo
+
+| Component | URL |
+|-----------|-----|
+| **Frontend** | [ravikantiakshay.github.io/code-review-assistant/frontend/](https://ravikantiakshay.github.io/code-review-assistant/frontend/) |
+| **API Docs** | [code-review-assistant-jquc.onrender.com/docs](https://code-review-assistant-jquc.onrender.com/docs) |
+
 ## Features
 
 - 🔍 **Static Analysis**: Flake8 + Radon for Python, ESLint for JavaScript
