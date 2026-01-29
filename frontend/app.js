@@ -53,6 +53,10 @@ const elements = {
 
     // Nav
     docsLink: document.getElementById('docs-link'),
+
+    // Export buttons
+    exportGithubBtn: document.getElementById('export-github-btn'),
+    exportPatchBtn: document.getElementById('export-patch-btn'),
 };
 
 // Initialize
@@ -60,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initDropzone();
     initFilters();
+    initExportButtons();
     loadRulesets();
 
     // Set docs link
@@ -456,4 +461,99 @@ function copyToClipboard(btn, text) {
     }).catch(err => {
         console.error('Copy failed:', err);
     });
+}
+
+// Export Button Handlers
+function initExportButtons() {
+    if (elements.exportGithubBtn) {
+        elements.exportGithubBtn.addEventListener('click', exportGitHubPRComments);
+    }
+    if (elements.exportPatchBtn) {
+        elements.exportPatchBtn.addEventListener('click', exportPatchFile);
+    }
+}
+
+async function exportGitHubPRComments() {
+    if (!reviewResults || reviewResults.length === 0) {
+        alert('No review results to export');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/export/github-pr-comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ranked_issues: reviewResults,
+                repo_owner: 'owner',
+                repo_name: 'repo',
+                pull_number: 1,
+                commit_sha: 'HEAD'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Export failed');
+        }
+
+        const data = await response.json();
+
+        // Create and download JSON file
+        const blob = new Blob([JSON.stringify(data.content, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'github-pr-comments.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('Export failed:', error);
+        alert('Failed to export GitHub PR comments');
+    }
+}
+
+async function exportPatchFile() {
+    if (!reviewResults || reviewResults.length === 0) {
+        alert('No review results to export');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/export/patch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ranked_issues: reviewResults
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Export failed');
+        }
+
+        const data = await response.json();
+
+        if (!data.content || data.content.trim() === '') {
+            alert(data.message || 'No fixable issues found. Issues need both snippet and fix fields.');
+            return;
+        }
+
+        // Create and download patch file
+        const blob = new Blob([data.content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'autofix.patch';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('Export failed:', error);
+        alert('Failed to export patch file');
+    }
 }

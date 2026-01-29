@@ -23,6 +23,10 @@ from backend.llm.reviewer import review_file_with_llm
 from backend.reviews.deduplicator import deduplicate_reviews
 from backend.reviews.ranking import rank_reviews
 from backend.rulesets.registry import RULESETS
+from backend.exports import (
+    export_github_pr_comments_json,
+    generate_patch_file,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -389,3 +393,69 @@ async def upload_zip(file: UploadFile = File(...)):
         files=all_files,
         indexed_files=indexed_files,
     )
+
+
+# ====================
+# Export Endpoints
+# ====================
+
+class ExportRequest(BaseModel):
+    ranked_issues: List[Dict[str, Any]]
+    repo_owner: Optional[str] = "owner"
+    repo_name: Optional[str] = "repo"
+    pull_number: Optional[int] = 1
+    commit_sha: Optional[str] = "HEAD"
+
+
+@app.post("/export/github-pr-comments")
+def export_pr_comments(request: ExportRequest):
+    """
+    Export review results as GitHub PR comment JSON format.
+    
+    This generates JSON compatible with GitHub's Pull Request Review API.
+    Can be used to post comments via the GitHub API.
+    """
+    try:
+        json_output = export_github_pr_comments_json(
+            ranked_issues=request.ranked_issues,
+            repo_owner=request.repo_owner,
+            repo_name=request.repo_name,
+            pull_number=request.pull_number,
+            commit_sha=request.commit_sha
+        )
+        return {"format": "github_pr_review", "content": json.loads(json_output)}
+    except Exception as e:
+        logger.error(f"Export failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/export/patch")
+def export_patch(request: ExportRequest):
+    """
+    Generate a unified diff patch file for autofix.
+    
+    This creates a patch that can be applied with `git apply`.
+    Only includes issues that have both 'snippet' and 'fix' fields.
+    """
+    try:
+        patch_content = generate_patch_file(request.ranked_issues)
+        
+        if not patch_content.strip():
+            return {
+                "format": "unified_diff",
+                "content": "",
+                "message": "No fixable issues found (issues need both 'snippet' and 'fix' fields)"
+            }
+        
+        return {
+            "format": "unified_diff",
+            "content": patch_content,
+            "fixable_issues": len([i for i in request.ranked_issues if i.get("fix") and i.get("snippet")])
+        }
+    except Exception as e:
+        logger.error(f"Patch generation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Need to import json for the export endpoint
+import json
