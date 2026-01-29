@@ -188,6 +188,17 @@ The system has been evaluated against a seed repository with 39 known issues:
 | Readability | 58.8% |
 | Correctness | 45.5% |
 
+## 📚 Documentation & Deliverables
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| **Prompt Templates** | [`docs/prompts.md`](docs/prompts.md) | LLM prompts, JSON schema, customization guide |
+| **Sample Outputs** | [`docs/sample_outputs/`](docs/sample_outputs/) | Example Python & JavaScript review outputs |
+| **Evaluation Metrics** | [`docs/evaluation_metrics.md`](docs/evaluation_metrics.md) | Precision/Recall breakdown by category |
+| **Evaluation Report** | [`evaluation/evaluation_report.md`](evaluation/evaluation_report.md) | Detailed analysis with TP/FP/FN |
+| **Ground Truth** | [`evaluation/ground_truth.json`](evaluation/ground_truth.json) | 39 annotated issues for testing |
+| **Test Repository** | [`evaluation/seed_repo/`](evaluation/seed_repo/) | Code files with intentional issues |
+
 ## Configuration
 
 ### Environment Variables
