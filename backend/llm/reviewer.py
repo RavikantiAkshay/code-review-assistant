@@ -182,6 +182,7 @@ File content:
         backoff *= 2
 
     raw_output = response.choices[0].message.content.strip()
+    raw_output = re.sub(r"<think>.*?</think>", "", raw_output, flags=re.DOTALL).strip()
 
     match = re.search(r"\{.*\}", raw_output, re.DOTALL)
     if not match:
