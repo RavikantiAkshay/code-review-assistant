@@ -7,7 +7,7 @@
 | Test Date | 2026-01-27 |
 | Ground Truth Issues | 39 |
 | Test Repository | evaluation/seed_repo |
-| LLM Model | llama-3.1-8b-instant |
+| LLM Model | qwen/qwen3.6-27b |
 | LLM Temperature | 0 (deterministic) |
 
 ---

@@ -160,7 +160,7 @@ File content:
             logger.info("LLM request attempt %d for %s", attempt + 1, file_path)
 
             response = get_groq_client().chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="qwen/qwen3.6-27b",
                 messages=messages,
                 temperature=0,  # Deterministic output
                 timeout=30,

@@ -4,7 +4,7 @@ This document describes the prompts used by the Code Review Assistant's LLM comp
 
 ## Overview
 
-The LLM review uses Groq's `llama-3.1-8b-instant` model with structured JSON output for consistent, parseable results.
+The LLM review uses Groq's `qwen/qwen3.6-27b` model with structured JSON output for consistent, parseable results.
 
 ## Main Code Review Prompt
 
@@ -106,7 +106,7 @@ Focus particularly on:
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| Model | `llama-3.1-8b-instant` | Groq's fast inference model |
+| Model | `qwen/qwen3.6-27b` | Groq's fast inference model |
 | Temperature | `0` | Deterministic output |
 | Timeout | `30s` | Request timeout |
 | Max Retries | `3` | Retry on transient errors |
