@@ -17,13 +17,21 @@ CATEGORY_REACH = {
 
 
 def compute_impact(issue: Dict, category: str) -> float:
-    severity = issue["severity"]
-    source = issue.get("source", "llm")  # default llm
+    severity = issue.get("severity", "low").lower()
+    source = issue.get("source", "llm")
+    sources = issue.get("sources", [])
 
-    severity_score = SEVERITY_WEIGHT[severity]
-    confidence = 1.0 if source == "llm" else 0.7
-    reach = CATEGORY_REACH.get(category, 1.0)
+    severity_score = SEVERITY_WEIGHT.get(severity, 1)
+    if source == "both" or ("static" in sources and "llm" in sources):
+        confidence = 1.0
+    elif source in ["llm", "ast"]:
+        confidence = 1.0
+    elif "confidence" in issue and isinstance(issue["confidence"], (int, float)):
+        confidence = float(issue["confidence"])
+    else:
+        confidence = 0.85
 
+    reach = CATEGORY_REACH.get(category.lower(), 1.0)
     return round(severity_score * confidence * reach, 2)
 
 
