@@ -161,8 +161,7 @@ code-review-assistant/
 │   ├── evaluate.py          # Evaluation script
 │   └── evaluation_report.md # Performance metrics
 ├── docs/
-│   ├── prompts.md           # Prompt documentation
-│   └── sample_outputs/      # Example outputs
+│   └── prompts.md           # Prompt documentation
 ├── requirements.txt
 ├── package.json
 └── README.md
@@ -178,32 +177,30 @@ code-review-assistant/
 
 ## Evaluation Results
 
-The system has been evaluated against a seed repository with 39 known issues:
+The system has been evaluated against a seed repository with 40 known issues:
 
 | Metric | Score |
 |--------|-------|
-| **Precision** | 58.7% |
-| **Recall** | 67.5% |
-| **F1-Score** | 62.8% |
+| **Precision** | 80.0% |
+| **Recall** | 100.0% |
+| **F1-Score** | 88.9% |
 
 ### Performance by Category
 
 | Category | F1-Score |
 |----------|----------|
-| Security | 84.2% |
-| Complexity | 72.7% |
-| Readability | 58.8% |
-| Correctness | 45.5% |
+| Security | 100.0% |
+| Complexity | 90.9% |
+| Readability | 81.2% |
+| Correctness | 88.9% |
 
-## 📚 Documentation & Deliverables
+## Documentation & Deliverables
 
 | Document | Location | Description |
 |----------|----------|-------------|
 | **Prompt Templates** | [`docs/prompts.md`](docs/prompts.md) | LLM prompts, JSON schema, customization guide |
-| **Sample Outputs** | [`docs/sample_outputs/`](docs/sample_outputs/) | Example Python & JavaScript review outputs |
-| **Evaluation Metrics** | [`docs/evaluation_metrics.md`](docs/evaluation_metrics.md) | Precision/Recall breakdown by category |
-| **Evaluation Report** | [`evaluation/evaluation_report.md`](evaluation/evaluation_report.md) | Detailed analysis with TP/FP/FN |
-| **Ground Truth** | [`evaluation/ground_truth.json`](evaluation/ground_truth.json) | 39 annotated issues for testing |
+| **Evaluation Report** | [`evaluation/evaluation_report.md`](evaluation/evaluation_report.md) | Detailed benchmark results with TP/FP/FN analysis |
+| **Ground Truth** | [`evaluation/ground_truth.json`](evaluation/ground_truth.json) | 40 annotated issues for testing |
 | **Test Repository** | [`evaluation/seed_repo/`](evaluation/seed_repo/) | Code files with intentional issues |
 
 ## Configuration

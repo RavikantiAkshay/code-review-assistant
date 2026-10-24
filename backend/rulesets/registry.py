@@ -65,3 +65,7 @@ RULESETS = {
         ],
     },
 }
+
+# Add normalized aliases for API consistency (hyphen and underscore)
+RULESETS["react_hooks"] = RULESETS["react-hooks"]
+RULESETS["owasp_top_10"] = RULESETS["owasp-top-10"]

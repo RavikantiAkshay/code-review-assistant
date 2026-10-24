@@ -53,13 +53,38 @@ def run_review_on_seed_repo() -> Dict:
         response = requests.post(
             f"{API_BASE}/review",
             json=review_request,
-            timeout=120
+            timeout=(1, 30)
         )
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error calling review API: {e}")
-        return {"ranked_issues": [], "file_results": [], "summary": {}}
+    except requests.exceptions.RequestException:
+        print("API server not listening on :8000; executing review pipeline in-process...")
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from dotenv import load_dotenv
+        load_dotenv()
+        from backend.main import run_static_analysis, run_llm_review
+        from backend.reviews.deduplicator import deduplicate_reviews
+        from backend.reviews.ranking import rank_reviews
+
+        all_ranked_issues = []
+        file_results = []
+        for file_path in files:
+            abs_path = os.path.join(str(SEED_REPO_PATH.absolute()), file_path)
+            lang = "python" if file_path.endswith(".py") else "javascript"
+            static_reviews = run_static_analysis(file_path, abs_path, lang)
+            llm_reviews = run_llm_review(file_path, abs_path, lang, None)
+            merged = deduplicate_reviews(file=file_path, static_reviews=static_reviews, llm_reviews=llm_reviews)
+            ranked = rank_reviews(merged)
+            for r in ranked:
+                r["file"] = file_path
+            all_ranked_issues.extend(ranked)
+            file_results.append({"file": file_path, "issues": ranked})
+
+        return {
+            "ranked_issues": all_ranked_issues,
+            "file_results": file_results,
+            "summary": {"total_issues": len(all_ranked_issues)}
+        }
 
 
 def normalize_issue(issue: Dict) -> Tuple[str, int, str, str]:

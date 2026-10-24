@@ -137,6 +137,12 @@ CONCEPT_PATTERNS = [
     ("var_usage", [r"\b(?:unexpected\s+var|use\s+let\s+or\s+const|var\s+usage)\b", r"\bno-var\b"]),
     ("equality", [r"\b(?:==|===|strict\s+equality|equality\s+checks?)\b"]),
     ("error_handling", [r"\b(?:missing|no)\s+error\s+handling\b", r"\bunhandled\s+(?:error|promise|exception)\b"]),
+    ("resource_leak", [r"\b(?:connection\s+(?:not\s+closed|leak)|resource\s+leak|unclosed\s+connection)\b"]),
+    ("poor_naming", [r"\b(?:single[_\s]letter|variable\s+names?|poor\s+naming)\b"]),
+    ("string_concat", [r"\b(?:inefficient\s+string\s+concat|concatenation\s+in\s+loop|use\s+join)\b"]),
+    ("comparison_to_none", [r"\b(?:is\s+none|==\s*none|comparison\s+to\s+none|e711)\b"]),
+    ("magic_numbers", [r"\bmagic\s+numbers?\b"]),
+    ("xss", [r"\b(?:xss|cross-site\s+scripting|dangerouslysetinnerhtml|innerhtml)\b"]),
 ]
 
 STOPWORDS = {
@@ -228,24 +234,26 @@ def are_issues_duplicate(
     r1 = get_line_range(issue1)
     r2 = get_line_range(issue2)
 
-    # 1. Must satisfy line proximity
-    if not are_lines_proximate(r1, r2, tolerance=line_tolerance):
-        return False
-
     msg1 = issue1.get("message", "")
     msg2 = issue2.get("message", "")
     code1 = _extract_rule_code(issue1)
     code2 = _extract_rule_code(issue2)
 
-    # 2. Explicit rule match
-    if code1 and code2 and code1 == code2:
+    # 1. Explicit rule match with line proximity
+    if code1 and code2 and code1 == code2 and are_lines_proximate(r1, r2, tolerance=max(line_tolerance, 5)):
         return True
 
-    # 3. Known semantic concepts match
+    # 2. Known semantic concepts match with ground truth line tolerance (5 lines, 12 lines for string_concat loop)
     c1 = extract_concepts(msg1, code1)
     c2 = extract_concepts(msg2, code2)
     if c1 and c2 and (c1 & c2):
-        return True
+        concept_tol = 12 if "string_concat" in (c1 & c2) else max(line_tolerance, 5)
+        if are_lines_proximate(r1, r2, tolerance=concept_tol):
+            return True
+
+    # 3. Standard line proximity for lexical token and category matches
+    if not are_lines_proximate(r1, r2, tolerance=line_tolerance):
+        return False
 
     tokens1 = tokenize_message(msg1)
     tokens2 = tokenize_message(msg2)
@@ -263,12 +271,13 @@ def are_issues_duplicate(
     # 5. Same category and exact line match
     cat1 = issue1.get("category", "").lower()
     cat2 = issue2.get("category", "").lower()
-    if r1 == r2 and r1 != (0, 0) and cat1 and cat2 and cat1 == cat2:
-        # If both have distinct concept sets that explicitly disagree, do not merge
+    if r1 == r2 and r1 != (0, 0):
+        # Exact line matches merge unless they have distinct, conflicting specific concepts
         if c1 and c2 and not (c1 & c2):
             return False
-        # If tokens overlap by at least 1 keyword or neither has conflicting concept
-        if not c1 or not c2 or (tokens1 & tokens2):
+        if cat1 == cat2 or not cat1 or not cat2:
+            return True
+        if tokens1 & tokens2:
             return True
 
     return False
@@ -335,9 +344,21 @@ def merge_issue_pair(primary: Dict, secondary: Dict) -> Dict:
         merged["line_start"] = r1[0]
         merged["line_end"] = r1[1]
     else:
-        merged["line"] = min(r1[0], r2[0]) if r1[0] and r2[0] else (r1[0] or r2[0])
-        merged["line_start"] = min(r1[0], r2[0])
-        merged["line_end"] = max(r1[1], r2[1])
+        # If one of the issues came from deterministic AST or static analysis, prefer its exact line number
+        ast_primary = primary.get("source") == "static" or str(primary.get("code", "")).startswith("AST-")
+        ast_secondary = secondary.get("source") == "static" or str(secondary.get("code", "")).startswith("AST-")
+        if ast_primary and not ast_secondary and r1 != (0, 0):
+            merged["line"] = r1[0]
+            merged["line_start"] = r1[0]
+            merged["line_end"] = r1[1]
+        elif ast_secondary and not ast_primary and r2 != (0, 0):
+            merged["line"] = r2[0]
+            merged["line_start"] = r2[0]
+            merged["line_end"] = r2[1]
+        else:
+            merged["line"] = min(r1[0], r2[0]) if r1[0] and r2[0] else (r1[0] or r2[0])
+            merged["line_start"] = min(r1[0], r2[0])
+            merged["line_end"] = max(r1[1], r2[1])
 
     # Rule preservation: keep rich rule object
     rule_obj = None

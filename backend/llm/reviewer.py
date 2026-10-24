@@ -134,6 +134,9 @@ ABSOLUTE RULES:
   - include the rule ID and link inside the "rule" object
 - If no rule applies, set "rule" to null
 - NEVER mention rule IDs or links inside "message"
+- Keep "message" concise (one clear sentence, max 15 words)
+- Keep "snippet" and "fix" short (single line or minimal block)
+- Focus strictly on real functional defects, security vulnerabilities, and logic flaws; ignore purely cosmetic style preferences
 
 JSON schema:
 {JSON_SCHEMA}
@@ -160,9 +163,10 @@ File content:
             logger.info("LLM request attempt %d for %s", attempt + 1, file_path)
 
             response = get_groq_client().chat.completions.create(
-                model="qwen/qwen3.6-27b",
+                model="qwen/qwen3.8-27b",
                 messages=messages,
                 temperature=0,  # Deterministic output
+                max_tokens=800,
                 timeout=30,
             )
             break

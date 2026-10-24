@@ -32,16 +32,34 @@ def analyze_js_file(file_path: str) -> List[Dict]:
 
     for file_report in eslint_output:
         for msg in file_report.get("messages", []):
-            # Skip fatal parsing errors that aren't actionable
-            if msg.get("fatal"):
+            rule_id = msg.get("ruleId") or ""
+            text = msg.get("message") or ""
+
+            # Skip CommonJS / Node environment globals false alarms
+            if rule_id == "no-undef" and any(g in text for g in ["'module'", "'exports'", "'require'", "'process'"]):
                 continue
+
+            issue_line = msg.get("line")
+            # Align react/prop-types to component definition header line
+            if rule_id == "react/prop-types":
+                try:
+                    with open(file_report.get("filePath"), "r", encoding="utf-8", errors="ignore") as f:
+                        src_lines = f.readlines()
+                    for idx in range(min(len(src_lines) - 1, max(0, (issue_line or 1) - 1)), -1, -1):
+                        line_str = src_lines[idx]
+                        if ("function " in line_str or "const " in line_str) and "props" in line_str:
+                            issue_line = idx + 1
+                            break
+                except Exception:
+                    pass
+
             issues.append({
                 "tool": "eslint",
                 "file": file_report.get("filePath"),
-                "line": msg.get("line"),
+                "line": issue_line,
                 "column": msg.get("column"),
-                "code": msg.get("ruleId") or "",
-                "message": msg.get("message"),
+                "code": rule_id,
+                "message": text,
                 "severity": "medium" if msg.get("severity", 1) == 1 else "high"
             })
 

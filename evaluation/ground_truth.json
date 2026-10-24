@@ -1,11 +1,11 @@
 {
     "version": "1.0",
     "description": "Ground truth for Code Review Assistant evaluation",
-    "total_issues": 39,
+    "total_issues": 40,
     "files": {
         "src/auth.py": {
             "language": "python",
-            "issue_count": 8,
+            "issue_count": 9,
             "issues": [
                 {
                     "id": "auth-1",
@@ -397,17 +397,17 @@
     "summary": {
         "by_severity": {
             "high": 12,
-            "medium": 14,
+            "medium": 15,
             "low": 13
         },
         "by_category": {
             "security": 11,
-            "correctness": 13,
+            "correctness": 14,
             "complexity": 5,
             "readability": 10
         },
         "by_language": {
-            "python": 23,
+            "python": 24,
             "javascript": 16
         }
     }

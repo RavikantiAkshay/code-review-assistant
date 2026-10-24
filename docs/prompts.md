@@ -4,7 +4,7 @@ This document describes the prompts used by the Code Review Assistant's LLM comp
 
 ## Overview
 
-The LLM review uses Groq's `qwen/qwen3.6-27b` model with structured JSON output for consistent, parseable results.
+The LLM review uses Groq's `qwen/qwen3.8-27b` model with structured JSON output for consistent, parseable results.
 
 ## Main Code Review Prompt
 
