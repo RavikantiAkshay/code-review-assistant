@@ -887,3 +887,13 @@ def build_repository_symbol_graph(file_paths: List[str], base_dir: str) -> Symbo
             continue
 
     return graph
+
+
+def get_language_for_file(file_path: str) -> Optional[str]:
+    """Detect programming language from file extension."""
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".py":
+        return "python"
+    elif ext in [".js", ".jsx"]:
+        return "javascript" if ext == ".js" else "jsx"
+    return None

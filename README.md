@@ -162,6 +162,11 @@ code-review-assistant/
 │   └── evaluation_report.md # Performance metrics
 ├── docs/
 │   └── prompts.md           # Prompt documentation
+├── mcp_server/
+│   ├── server.py            # JSON-RPC 2.0 stdio server
+│   ├── tools.py             # MCP review, diff, AST, and metrics tools
+│   ├── claude_desktop_config.json
+│   └── cursor_mcp.json
 ├── requirements.txt
 ├── package.json
 └── README.md

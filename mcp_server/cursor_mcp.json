@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "code-review-assistant": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp_server.server"
+      ],
+      "env": {
+        "PYTHONPATH": ".",
+        "GROQ_API_KEY": "your_groq_api_key_here"
+      }
+    }
+  }
+}
